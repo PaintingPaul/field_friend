@@ -5,8 +5,9 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import rosys
 
-from field_friend.automations import (BatteryWatcher, CoinCollecting, DemoWeeding, FieldProvider, Mowing, PathProvider,
-                                      PathRecorder, PlantLocator, PlantProvider, Puncher, Weeding, WeedingNew)
+from field_friend.automations import (BatteryWatcher, CoinCollecting, ControlPanel, DemoWeeding, FieldProvider, Mowing,
+                                      PathProvider, PathRecorder, PlantLocator, PlantProvider, Puncher, Weeding,
+                                      WeedingNew)
 from field_friend.hardware import FieldFriendHardware, FieldFriendSimulation
 from field_friend.navigation import GnssHardware, GnssSimulation
 from field_friend.vision import CameraConfigurator, SimulatedCam, SimulatedCamProvider, UsbCamProvider
@@ -65,6 +66,7 @@ class System:
         self.weeding = Weeding(self)
         self.weeding_new = WeedingNew(self)
         self.coin_collecting = CoinCollecting(self)
+        self.control_panel = ControlPanel(self.field_friend, self.driver, self.odometer)
         self.path_provider = PathProvider()
         self.path_recorder = PathRecorder(self.path_provider, self.driver, self.steerer, self.gnss)
         self.field_provider = FieldProvider()
@@ -85,7 +87,8 @@ class System:
         self.mowing = Mowing(self.field_friend, self.field_provider, driver=self.driver,
                              path_planner=self.path_planner, gnss=self.gnss, robot_width=width)
 
-        self.automations = {'demo_weeding': self.demo_weeding.start,
+        self.automations = {'control_panel': self.control_panel.start,
+                            'demo_weeding': self.demo_weeding.start,
                             'mowing': self.mowing.start,
                             'collecting': self.coin_collecting.start,
                             'weeding': self.weeding.start,

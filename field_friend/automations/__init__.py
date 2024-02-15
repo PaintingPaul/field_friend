@@ -1,6 +1,7 @@
 
 from .battery_watcher import BatteryWatcher
 from .coin_collecting import CoinCollecting
+from .control_panel import ControlPanel
 from .coverage_planer import CoveragePlanner
 from .demo_weeding import DemoWeeding
 from .field_provider import Field, FieldObstacle, FieldProvider, Row
@@ -34,5 +35,6 @@ __all__ = [
     'Weeding',
     'WeedingNew',
     'BatteryWatcher',
+    'ControlPanel',
     'CoinCollecting',
 ]

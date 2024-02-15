@@ -102,6 +102,60 @@ class operation:
                         ui.checkbox('with drilling', value=True).bind_value(
                             self.system.coin_collecting, 'with_drilling')
 
+                with ui.column().bind_visibility_from(automations_toggle, 'value', value='control_panel'):
+                    with ui.row():
+                        with ui.card().tight():
+                            mode = ui.toggle(
+                                ['Forward', 'Backward', 'Both', 'Circle'],
+                                value='Forward').bind_value(
+                                system.control_panel, 'mode').props('outline').tooltip('Select the driving mode.')
+                    with ui.row():
+                        with ui.card().tight():
+                            with ui.expansion('Set Target', value=True, icon='ads_click'):
+                                def distance_visibility(mode):
+                                    return mode in ['Forward', 'Backward', 'Both']
+                                ui.checkbox('Loop', value=True).tooltip(
+                                    'Execute Automation in an infinite loop').bind_value(self.system.control_panel, 'loop').bind_visibility_from(mode, 'value', value='Both')
+                                # ui.checkbox('Loop', value=True).tooltip(
+                                # 'Drive forward and backward in an infinite loop').bind_value(self.system.control_panel, 'loop').bind_visibility_from(mode, 'value', value='Circle')
+                                select_target_swith = ui.checkbox('Click to select Coordinates', value=False).tooltip(
+                                    'Click in the 3D view to select a target point')
+                                with ui.row():
+                                    ui.number(
+                                        'x-Coordinate', format='%.2f', value=0.00, step=0.1).props(
+                                        'dense outlined suffix=m').classes('w-24').bind_value(
+                                        self.system.control_panel, 'target_point_x').tooltip(
+                                        'Set the x-coordinate for the target point')
+                                    ui.number(
+                                        'y-Coordinate', format='%.2f', value=0.00, step=0.1).props(
+                                        'dense outlined suffix=m').classes('w-24').bind_value(
+                                        self.system.control_panel, 'target_point_y').tooltip(
+                                        'Set the y-coordinate for the target point')
+                                with ui.row().bind_visibility_from(mode, 'value', backward=distance_visibility):
+                                    ui.number(
+                                        'Distance', format='%.2f', value=0.00, step=0.1).props(
+                                        'dense outlined suffix=m').classes('w-24').bind_value(
+                                        self.system.control_panel, 'target_distance').tooltip(
+                                        'Set the distance for the target point')
+                                    ui.button('Set', on_click=self.system.control_panel.calc_target_by_distance).tooltip(
+                                        'Set the target point depending on the given distance.')
+                                with ui.row().bind_visibility_from(mode, 'value', value='Circle'):
+                                    ui.number(
+                                        'Radius', format='%.2f', value=0.00, step=0.5).props(
+                                        'dense outlined suffix=m').classes('w-24').bind_value(
+                                        self.system.control_panel, 'radius').tooltip(
+                                        'Set the circle radius')
+                        with ui.card().tight():
+                            with ui.expansion('Change Yaw', value=True, icon='flip_camera_android'):
+                                with ui.row():
+                                    yaw_knob = ui.knob(0.0, show_value=True, track_color='grey-2',
+                                                       min=0, max=360).props('reverse = True').bind_value(self.system.control_panel, 'set_yaw')
+                                    ui.button('Set Yaw', on_click=self.system.control_panel.robot_rotate)
+                                ui.number(
+                                    'Yaw', format='%.2f', value=0.00, min=0, max=360).props(
+                                    'dense outlined suffix=m').classes('w-32').bind_value(yaw_knob).tooltip(
+                                    'Rotate the robot')
+
                 with ui.row().classes('items-center'):
                     async def ensure_start() -> bool:
                         self.log.info('Ensuring start of automation')
