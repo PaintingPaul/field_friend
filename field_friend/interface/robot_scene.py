@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 import rosys
 from nicegui import events, ui
 
+from field_friend import interface
+
 from .field_friend_object import field_friend_object
 
 if TYPE_CHECKING:
@@ -41,3 +43,19 @@ class robot_scene:
             self.scene.move_camera(x=x, y=y, z=height,
                                    look_at_x=position.x, look_at_y=position.y)
             return
+
+        # for hit in event.hits:
+        #     if hit.object_id == 'ground':
+        #         self.system.control_panel.target_point_x = hit.x
+        #         self.system.control_panel.target_point_y = hit.y
+        #     return
+        # if self.system.automator.default_automation is 'control_panel':
+        #     rosys.notify('hello')
+
+        # TODO aus dem Dictionary "default_autoamtion" den key 'control_panel' auslesen
+        if self.system.automator.default_automation == self.system.automations['control_panel'] and self.system.control_panel.select_coordinates:
+            for hit in event.hits:
+                if hit.object_id == 'ground':
+                    self.system.control_panel.target_point_x = hit.x
+                    self.system.control_panel.target_point_y = hit.y
+                return

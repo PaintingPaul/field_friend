@@ -95,7 +95,7 @@ class System:
                             'weeding_new': self.weeding_new.start
                             }
         self.automator = rosys.automation.Automator(None, on_interrupt=self.field_friend.stop,
-                                                    default_automation=self.coin_collecting.start)
+                                                    default_automation=self.control_panel.start)
         if self.is_real and self.field_friend.battery_control:
             self.battery_watcher = BatteryWatcher(self.field_friend, self.automator)
 

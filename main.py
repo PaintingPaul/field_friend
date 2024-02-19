@@ -30,12 +30,12 @@ def startup() -> None:
                         with ui.column().style('width: 55%; height: 100%; flex-wrap: nowrap'):
                             interface.operation(system, leaflet_map_landing)
                         with ui.column().classes('h-full').style('width: calc(45% - 2rem); flex-wrap: nowrap;'):
-                            with ui.card().classes('w-full h-full p-0'):
-                                with ui.scroll_area().classes('w-full h-full'):
+                            with ui.card().classes('w-full h-full'):
+                                with ui.column().classes('w-full h-full'):
                                     with ui.card().classes('w-full'):
                                         interface.camera(system.usb_camera_provider, system.automator, system.detector,
                                                          system.puncher, version=system.field_friend.version)
-                                    with ui.card().classes('w-full'):
+                                    with ui.card().tight().classes('w-full'):
                                         interface.robot_scene(system)
                 with splitter.separator:
                     ui.button(icon='drag_indicator').props('round')

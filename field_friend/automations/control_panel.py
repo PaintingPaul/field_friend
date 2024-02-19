@@ -23,6 +23,7 @@ class ControlPanel:
         self.target_distance: float = 0.00
         self.set_yaw: float = 0.00
         self.loop: bool = True
+        self.select_coordinates: bool = False
         self.radius: float = 0.00
 
     # async def handle_click(self, event: SceneClickEventArguments):

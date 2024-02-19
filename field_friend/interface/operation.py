@@ -137,7 +137,7 @@ class operation:
                                         'Execute Automation in an infinite loop').bind_value(self.system.control_panel, 'loop').bind_visibility_from(mode, 'value', value='Both')
                                     # ui.checkbox('Loop', value=True).tooltip(
                                     # 'Drive forward and backward in an infinite loop').bind_value(self.system.control_panel, 'loop').bind_visibility_from(mode, 'value', value='Circle')
-                                    select_target_swith = ui.checkbox('Click to select Coordinates', value=False).tooltip(
+                                    ui.checkbox('Click to select Coordinates', value=False).bind_value(self.system.control_panel, 'select_coordinates').tooltip(
                                         'Click in the 3D view to select a target point')
                                     with ui.row():
                                         ui.number(
