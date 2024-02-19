@@ -52,15 +52,22 @@ class Gnss(rosys.persistence.PersistentModule, ABC):
         rosys.on_repeat(self.update, 1.0)
         rosys.on_repeat(self.try_connection, 3.0)
 
-    def backup(self) -> dict[str, Any]:
+    def backup(self) -> dict:
         return {
-            'reference_lat': self.reference_lat,
-            'reference_lon': self.reference_lon,
+            'record': rosys.persistence.to_dict(self.record)
         }
 
     def restore(self, data: dict[str, Any]) -> None:
-        self.reference_lat = data.get('reference_lat')
-        self.reference_lon = data.get('reference_lon')
+        record = data.get('record')
+        self.record.timestamp = record["timestamp"]
+        self.record.latitude = record["latitude"]
+        self.record.longitude = record["longitude"]
+        self.record.mode = record["mode"]
+        self.record.gps_qual = record["gps_qual"]
+        self.record.altitude = record["altitude"]
+        self.record.separation = record["separation"]
+        self.record.heading = record["heading"]
+        self.record.speed_kmh = record["speed_kmh"]
 
     @abstractmethod
     async def update(self) -> None:
@@ -158,6 +165,7 @@ class GnssHardware(Gnss):
                         record.latitude = msg.latitude
                         record.longitude = msg.longitude
                         record.mode = msg.mode_indicator
+                        # print(f'The GNSS message: {msg.mode_indicator}')
                         has_location = True
                     if msg.sentence_type == 'HDT' and getattr(msg, 'heading', None) is not None:
                         # self.log.info(f'HDT: Heading: {msg.heading}')
@@ -222,6 +230,10 @@ class GnssSimulation(Gnss):
     async def update(self) -> None:
         if self.device is None:
             return
+        if self.reference_lat is None:
+            self.reference_lat = 51.983159
+        if self.reference_lon is None:
+            self.reference_lon = 7.434212
         pose = deepcopy(self.pose_provider.pose)
         pose.time = rosys.time()
         await rosys.sleep(0.5)
