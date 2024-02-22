@@ -172,7 +172,7 @@ class operation:
                                         ui.button('Set Yaw', on_click=self.system.control_panel.robot_rotate)
                                     ui.number(
                                         'Yaw', format='%.2f', value=0.00, min=0, max=360).props(
-                                        'dense outlined suffix=m').classes('w-32').bind_value(yaw_knob).tooltip(
+                                        'dense outlined suffix=deg').classes('w-32').bind_value(yaw_knob).tooltip(
                                         'Rotate the robot')
 
             ui.space()

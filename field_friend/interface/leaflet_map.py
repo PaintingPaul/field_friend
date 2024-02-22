@@ -1,16 +1,19 @@
 
 import logging
-from typing import TYPE_CHECKING, Dict, List, Union
 import uuid
-import rosys.geometry
-from nicegui import events, ui, elements
-import rosys
-from .key_controls import KeyControls
-from ..automations import FieldProvider, Field
-from geographiclib.geodesic import Geodesic
 from copy import deepcopy
-from field_friend.navigation.point_transformation import wgs84_to_cartesian, cartesian_to_wgs84
+from typing import TYPE_CHECKING, Dict, List, Union
+
 import numpy as np
+import rosys
+import rosys.geometry
+from geographiclib.geodesic import Geodesic
+from nicegui import elements, events, ui
+
+from field_friend.navigation.point_transformation import cartesian_to_wgs84, wgs84_to_cartesian
+
+from ..automations import Field, FieldProvider
+from .key_controls import KeyControls
 
 if TYPE_CHECKING:
     from field_friend.system import System
@@ -50,6 +53,8 @@ class leaflet_map:
         self.field_layers: list[list] = []
         self.robot_marker = None
         self.drawn_marker = None
+        self.is_real: bool = False
+        self.target_marker_list: list = []
         self.obstacle_layers: list = []
         self.row_layers: list = []
         self.update_layers()
@@ -88,6 +93,27 @@ class leaflet_map:
                               outline_wgs84=point_list, reference_lat=point_list[0][0], reference_lon=point_list[0][1])
                 self.field_provider.add_field(field)
 
+        def handle_place_target(e: events.GenericEventArguments):
+            if self.system.automator.default_automation == self.system.automations['control_panel'] and self.system.control_panel.select_coordinates:
+                lat = e.args['latlng']['lat']
+                lng = e.args['latlng']['lng']
+                self.target_marker_list.append(self.m.marker(latlng=(lat, lng)))
+                with ui.dialog() as target_marker_dialog, ui.card():
+                    if self.is_real:
+                        ui.label('Sorry, this feature currently only works in the simulation.')
+                        ui.button('Close', on_click=lambda: self.abort_point_drawing(target_marker_dialog))
+                    else:
+                        ui.label('You are currently working in a simulation. Set the target the robot should drive to.')
+                        ui.button('Set target point', on_click=lambda: self.set_target_point(
+                            lat, lng, target_marker_dialog))
+                        ui.button('Abort', on_click=lambda: self.abort_point_drawing(target_marker_dialog))
+                    target_marker_dialog.open()
+
+        ui.checkbox('Is Real').bind_value(self, 'is_real')
+
+        with self.m as m:
+            m.on('map-click', handle_place_target)
+
         with self.m as m:
             m.on('draw:created', handle_draw)
         self.gnss.ROBOT_POSITION_LOCATED.register(self.update_robot_position)
@@ -105,10 +131,24 @@ class leaflet_map:
         ))
         ui.notify(f'Robot reference has been set to {latlon[0]}, {latlon[1]}')
 
+    def set_target_point(self, lat, lng, dialog):
+        dialog.close()
+        if len(self.target_marker_list) > 1:
+            self.m.remove_layer(self.target_marker_list.pop(-2))
+        reference_point = [self.gnss.reference_lat, self.gnss.reference_lon]
+        rosys.notify(f'Reference: {reference_point}')
+        target_point = [lat, lng]
+        rosys.notify(f'Target: {target_point}')
+        cartesian_coords = wgs84_to_cartesian(reference_point, target_point)
+        self.system.control_panel.target_point_y = cartesian_coords[0]
+        self.system.control_panel.target_point_x = cartesian_coords[1]*-1
+
     def abort_point_drawing(self, dialog) -> None:
         if self.drawn_marker is not None:
             self.m.remove_layer(self.drawn_marker)
         self.drawn_marker = None
+        if len(self.target_marker_list) > 0:
+            self.m.remove_layer(self.target_marker_list.pop())
         dialog.close()
 
     def add_point_active_object(self, latlon, dialog) -> None:
