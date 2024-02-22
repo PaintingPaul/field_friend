@@ -42,7 +42,6 @@ class ControlPanel:
         if self.mode == 'Circle':
             await self.drive_circle()
 
-    # Here is a bug that needs to be fixed!
     def calc_target_by_distance(self):
         current_x = self.odometer.prediction.x
         current_y = self.odometer.prediction.y

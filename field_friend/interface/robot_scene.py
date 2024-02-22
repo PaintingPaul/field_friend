@@ -22,7 +22,7 @@ class robot_scene:
         self.scene_look = False
 
         with self.scene_card.tight().classes('w-full place-items-center').style('max-width: 100%; overflow: hidden;'):
-            with ui.scene(200, 200, on_click=self.handle_click).classes('w-full') as self.scene:
+            with ui.scene(400, 400, on_click=self.handle_click).classes('w-full') as self.scene:
                 field_friend_object(self.system.odometer, self.system.usb_camera_provider, self.system.field_friend)
                 rosys.driving.driver_object(self.system.driver)
                 self.scene.move_camera(-0.5, -1, 2)
